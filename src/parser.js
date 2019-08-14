@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const backend = require('./backend');
+const variableHandler = require('./variable_handler.js');
 
 function parse(configPath, cliOpts) {
   const rawConfig = getRawConfig(configPath, cliOpts);
@@ -82,8 +83,7 @@ function performConfigSanityCheck(rawConfig) {
 }
 
 function formatConfig(rawConfig, { vars }) {
-  // TODO: This is where we apply CLI vars into the rawConfig
-  return rawConfig;
+  return variableHandler.updateUserVariables(rawConfig, vars);
 }
 
 module.exports = { parse };

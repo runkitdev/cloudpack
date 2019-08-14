@@ -3,11 +3,13 @@
 const fs = require('fs');
 const utils = require('util');
 const { spawn, exec } = require('child_process');
+const variableHandler = require('./variable_handler');
 
 const execAsync = utils.promisify(exec);
 const unlink = utils.promisify(fs.unlink);
 
 function generateTemplate([config, output, status]) {
+  // TODO: Relay other template sections
   const packerTemplate = {
     builders: generateBuilders(config),
     provisioners: generateProvisioners(config)
@@ -45,7 +47,10 @@ async function build([config, output, status]) {
       return [config, output, { error: true, errorMsg: parsedResult.errorMsg }];
     }
 
-    return [config, { ...output, ...parsedResult.resources }, status];
+    const newOutput = { ...output, ...parsedResult.resources };
+    const newConfig = variableHandler.updateRuntimeVariables(config, newOutput);
+
+    return [newConfig, newOutput, status];
   } catch(e) {
     if (e.code == 'EPERM') {
       const errorMsg = 'packer build needs to run as root. Make sure to `sudo` cloudpack';
@@ -59,13 +64,15 @@ async function build([config, output, status]) {
 }
 
 async function execPackerValidate(templatePath) {
-  await execAsync(`packer validate ${templatePath}`);
   if (process.env.verbose) console.log(`CMD: packer validate ${templatePath}`);
+  await execAsync(`packer validate ${templatePath}`);
 }
 
 async function execPackerBuild(templatePath) {
-  const build = spawn( 'packer', ['build', templatePath], { uid: 0 });
   if (process.env.verbose) console.log(`CMD: packer build ${templatePath}`);
+  const build = spawn(
+    'packer', ['build', '-color=false', templatePath], { uid: 0 }
+  );
 
   let stdout = '';
   for await (const data of build.stdout) {
