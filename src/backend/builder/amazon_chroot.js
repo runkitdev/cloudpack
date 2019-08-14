@@ -15,24 +15,40 @@ function configureBuilder(config) {
 }
 
 function parseBuildResult({ stdout }) {
-  // TODO: Wrong
-  const stdoutArray = stdout.split('\n').slice(0, -1);
-  const lastEntry = stdoutArray.pop();
+  const stdoutArray = stdout.split('\n');
+  const { amiId, snapshotId } = findCreatedResources(stdoutArray);
 
-  const amiIndex = lastEntry.indexOf('ami-', -2);
-  if (amiIndex !== -1) {
-    const amiId = lastEntry.slice(amiIndex, -2);
-    const snapshotId = findSnapshotId(stdoutArray);
+  if (amiId === null || snapshotId === null) {
+    let errorMsg = 'Failed during Packer build.';
+    if (! process.env.verbose) {
+      errorMsg = errorMsg.concat(` Packer output: \n\n\n ${stdout}`);
+    }
 
-    return { success: true, resources: { amiId, snapshotId } };
+    return { success: false, errorMsg };
   }
 
-  let errorMsg = 'Failed during Packer build.';
-  if (! process.env.verbose) {
-    errorMsg = errorMsg.concat(` Packer output: \n\n\n ${stdout}`);
-  }
+  return { success: true, resources: { amiId, snapshotId } };
+}
 
-  return { success: false, errorMsg };
+function findCreatedResources(stdoutArray) {
+  return stdoutArray.reduce((acc, stdoutLine) => {
+    if (acc.snapshotId === null)
+      acc.snapshotId = getSnapshotIdOnLine(stdoutLine);
+    if (acc.amiId === null)
+      acc.amiId = getAmiIdOnLine(stdoutLine);
+
+    return acc;
+  }, { snapshotId: null, amiId: null });
+}
+
+function getSnapshotIdOnLine(stdoutLine) {
+  if (stdoutLine.indexOf('Snapshot ID: snap-') === -1) return null;
+  return stdoutLine.slice(stdoutLine.indexOf('snap-'));
+}
+
+function getAmiIdOnLine(stdoutLine) {
+  if (stdoutLine.indexOf('AMI: ami-') === -1) return null;
+  return stdoutLine.slice(stdoutLine.indexOf('ami-'));
 }
 
 function getRelevantOutput(output) {
@@ -48,13 +64,6 @@ function getBuilderCredentials(config) {
     creds.secret_key = config.auth.secret_key;
 
   return creds;
-}
-
-function findSnapshotId(stdoutArray) {
-  return stdoutArray.reduce((acc, stdoutLine) => {
-    if (stdoutLine.indexOf('Snapshot ID: snap-') === -1) return acc;
-    return stdoutLine.slice(stdoutLine.indexOf('snap-'));
-  });
 }
 
 module.exports = { 
