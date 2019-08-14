@@ -1,0 +1,49 @@
+#!/usr/bin/env node
+'use strict';
+
+const cloudpack = require('../src');
+const commander = require('commander');
+
+function collect(value, acc) {
+  return { ...parseVar(value), ...acc };
+}
+
+function parseVar(value) {
+  let index = value.indexOf('=');
+
+  if (index !== -1) {
+    return { [value.slice(0, index)]: value.slice(index + 1) };
+  }
+
+  throw new Error(`Invalid CLI argument: "${value}"`);
+}
+
+const program = new commander.Command();
+
+program
+  .arguments('<cloudpack_config>')
+  .option('--var <value>', 'Variables to apply on cloudpack.conf', collect, {})
+  .option('--tmp-path <path>', 'Where to store generated packer template.', '/tmp')
+  .option('-v, --verbose', 'Enable extra verbosity.')
+  .option('--dry-run', 'Print generated packer template. Does not perform Packer builds.')
+  .action(async(configPath, cmd) => {
+    if (cmd.verbose) process.env.verbose = true;
+
+    const opts = {
+      vars: cmd.var,
+      tmpPath: cmd.tmpPath,
+      dryRun: cmd.dryRun,
+      outputFormat: 'json'
+    };
+
+    try {
+      await cloudpack.executePipeline(configPath, opts);
+    } catch(e) {
+      console.log('Fatal error: ' + e.message);
+      console.log(e);
+    }
+  });
+
+if (process.argv.length === 2) process.argv.push('-h');
+
+program.parse(process.argv);

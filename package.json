@@ -1,0 +1,17 @@
+{
+  "name": "cloudpack",
+  "version": "0.1.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "commander": "^3.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.1.0"
+  }
+}
