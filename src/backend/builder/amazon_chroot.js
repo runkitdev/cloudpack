@@ -20,9 +20,10 @@ function parseBuildResult({ stdout }) {
 
   if (amiId === null || snapshotId === null) {
     let errorMsg = 'Failed during Packer build.';
-    if (! process.env.verbose) {
-      errorMsg = errorMsg.concat(` Packer output: \n\n\n ${stdout}`);
-    }
+    if (! process.env.verbose)
+      errorMsg = errorMsg.concat(` Packer output: \n\n\n${stdout}`);
+    if (snapshotId !== null)
+      errorMsg = errorMsg.concat('\n\n[WARNING]: Dangling resources detected');
 
     return { success: false, errorMsg };
   }
@@ -57,6 +58,9 @@ function getRelevantOutput(output) {
 
 function getBuilderCredentials(config) {
   let creds = {};
+
+  // Auth may not be defined, in which case we assume user has creds on env/file
+  if (config.auth === null) return creds;
 
   if (config.auth.access_key !== 'environment')
     creds.access_key = config.auth.access_key;
