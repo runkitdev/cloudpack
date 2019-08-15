@@ -1,6 +1,6 @@
 'use strict';
 
-const output = ([config, output, status]) => {
+const output = ({ config, output, status }) => {
   if (config.cliOpts.dryRun) return output_dryrun(output, config);
   if (status.error) return output_error(output, status);
   return output_success(output, config);

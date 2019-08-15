@@ -41,7 +41,7 @@ function parse(configPath, cliOpts) {
     error: false
   };
 
-  return [config, output, status];
+  return { config, output, status };
 }
 
 function getRawConfig(configPath, cliOpts) {

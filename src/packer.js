@@ -8,7 +8,7 @@ const variableHandler = require('./variable_handler');
 const execAsync = utils.promisify(exec);
 const unlink = utils.promisify(fs.unlink);
 
-function generateTemplate([config, output, status]) {
+function generateTemplate({ config, output, status }) {
   // TODO: Relay other template sections
   const packerTemplate = {
     builders: generateBuilders(config),
@@ -18,14 +18,14 @@ function generateTemplate([config, output, status]) {
   const newOutput = { ...output, ...{ packerTemplate } };
 
   if (config.cliOpts.dryRun) {
-    return [config, newOutput, { error: true }];
+    return { config, output: newOutput, status: { error: true } };
   }
 
-  return [config, newOutput, status];
+  return { config, output: newOutput, status };
 }
 
-async function build([config, output, status]) {
-  if (status.error) return [config, output, status];
+async function build({ config, output, status }) {
+  if (status.error) return { config, output, status };
   
   const templatePath = `${config.cliOpts.tmpPath}/packer.json`;
   writePackerTemplate(templatePath, output.packerTemplate);
@@ -36,7 +36,7 @@ async function build([config, output, status]) {
   } catch(e) {
     cleanUpPackerTemplate(templatePath);
     const errorMsg = `Generated Packer template is invalid.\n\n${e.stdout}`;
-    return [config, output, { error: true, errorMsg }]; 
+    return { config, output, status: { error: true, errorMsg } };
   }
 
   try {
@@ -44,17 +44,18 @@ async function build([config, output, status]) {
     const parsedResult = config.backends.builder.parseBuildResult(buildResult);
 
     if (! parsedResult.success) {
-      return [config, output, { error: true, errorMsg: parsedResult.errorMsg }];
+      const newStatus = { error: true, errorMsg: parsedResult.errorMsg };
+      return { config, output, status: newStatus };
     }
 
     const newOutput = { ...output, ...parsedResult.resources };
     const newConfig = variableHandler.updateRuntimeVariables(config, newOutput);
 
-    return [newConfig, newOutput, status];
+    return { config: newConfig, output: newOutput, status };
   } catch(e) {
-    if (e.code == 'EPERM') {
+    if (e.code === 'EPERM') {
       const errorMsg = 'packer build needs to run as root. Make sure to `sudo` cloudpack';
-      return [config, output, { error: true, errorMsg }]; 
+      return { config, output, status: { error: true, errorMsg } };
     }
 
     throw e;
