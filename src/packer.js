@@ -4,6 +4,7 @@ const fs = require('fs');
 const utils = require('util');
 const { spawn, exec } = require('child_process');
 const variableHandler = require('./variable_handler');
+const rcLocal = require('./boot_script/rc_local');
 
 const execAsync = utils.promisify(exec);
 const unlink = utils.promisify(fs.unlink);
@@ -12,7 +13,7 @@ function generateTemplate({ config, output, status }) {
   // TODO: Relay other template sections
   const packerTemplate = {
     builders: generateBuilders(config),
-    provisioners: generateProvisioners(config)
+    provisioners: generateProvisioners(config, output)
   };
 
   const newOutput = { ...output, ...{ packerTemplate } };
@@ -50,6 +51,8 @@ async function build({ config, output, status }) {
 
     const newOutput = { ...output, ...parsedResult.resources };
     const newConfig = variableHandler.updateRuntimeVariables(config, newOutput);
+
+    postBuildHook(newConfig, newOutput);
 
     return { config: newConfig, output: newOutput, status };
   } catch(e) {
@@ -99,9 +102,8 @@ function writePackerTemplate(templatePath, packerTemplate) {
   const opts = { mode: 0o600 };
   fs.writeFileSync(templatePath, JSON.stringify(packerTemplate, null, 2), opts);
 
-  if (process.env.verbose) {
+  if (process.env.verbose)
     console.log(`Packer template written to ${templatePath}`);
-  }
 }
 
 async function cleanUpPackerTemplate(templatePath) {
@@ -120,10 +122,18 @@ function generateBuilders(config) {
   return [config.backends.builder.configureBuilder(config)];
 }
 
-function generateProvisioners(config) {
-  // TODO: If boot_script type is `systemd`, we need to generate the SH and 
-  // append it to the build_script.
-  return config.build_script;
+function generateProvisioners(config, { bootScript }) {
+  if (config.boot_script === null) return config.build_script;
+  if (config.boot_script.type !== 'rc.local') return config.build_script;
+
+  return [
+    ...config.build_script,
+    ...rcLocal.generateProvisioners(bootScript, config)
+  ];
+}
+
+function postBuildHook(config, ) {
+  rcLocal.cleanUpBootFile(config);
 }
 
 module.exports = { generateTemplate, build };

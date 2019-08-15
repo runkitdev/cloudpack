@@ -7,6 +7,8 @@ const output = ({ config, output, status }) => {
 };
 
 const output_success = (output, config) => {
+  if (process.env.verbose) output_dryrun(output, config);
+
   const relevantOutput = {
     ...(config.backends.builder.getRelevantOutput(output, config)),
     ...(config.backends.launchTemplate.getRelevantOutput(output, config))
@@ -22,8 +24,13 @@ const output_error = (output, status) => {
 };
 
 const output_dryrun = (output, config) => {
-  console.log('[Dry-Run] Generated Packer template:');
+  console.log('Generated Packer template:');
   console.log(JSON.stringify(output.packerTemplate, null, 2));
+
+  if (output.bootScript !== null) {
+    console.log('\n\nGenerated BootScript:');
+    console.log(`\n${output.bootScript}`);
+  }
 
   if (process.env.verbose) {
     console.log('\n\n[Debug] Internal pipeline config:');

@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const backend = require('./backend');
+const bootScript = require('./boot_script');
 const variableHandler = require('./variable_handler.js');
 
 function parse(configPath, cliOpts) {
@@ -24,7 +25,7 @@ function parse(configPath, cliOpts) {
     auth: authConfig,
     builder: backends.builder.parseRawConfig(rawConfig.builder, rawConfig),
     build_script: parseBuildScript(rawConfig),
-    //'boot_script': parse_boot_script(rawConfig),
+    boot_script: bootScript.parseRawConfig(rawConfig),
     launch_template: launchTemplateConfig
   };
 
@@ -88,16 +89,17 @@ function readCloudpackConfig(path) {
 }
 
 function performConfigSanityCheck(rawConfig) {
-  if (rawConfig.auth === undefined)
-    throw new Error('Missing `auth` section on cloudpack config.');
   if (rawConfig.builder === undefined)
     throw new Error('Missing `builder` section on cloudpack config.');
-  if (rawConfig.build_script === undefined)
-    throw new Error('Missing `build_script` section on cloudpack config.');
 }
 
 function formatConfig(rawConfig, { vars }) {
-  return variableHandler.updateUserVariables(rawConfig, vars);
+  let newConfig = variableHandler.updateUserVariables(rawConfig, vars);
+
+  if (rawConfig.build_script === undefined)
+    newConfig.build_script = [];
+
+  return newConfig;
 }
 
 module.exports = { parse };
