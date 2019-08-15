@@ -8,14 +8,24 @@ function parse(configPath, cliOpts) {
   const rawConfig = getRawConfig(configPath, cliOpts);
   const backends = getBackends(rawConfig);
 
+  let authConfig = null;
+  if (backends.auth !== null) {
+    authConfig = backends.auth.parseRawConfig(rawConfig.auth, rawConfig);
+  }
+
+  let launchTemplateConfig = null;
+  if (backends.launchTemplate !== null) {
+    launchTemplateConfig = backends.launchTemplate.parseRawConfig(rawConfig);
+  }
+
   const config = {
     cliOpts,
     backends,
-    auth: backends.auth.parseRawConfig(rawConfig.auth, rawConfig),
+    auth: authConfig,
     builder: backends.builder.parseRawConfig(rawConfig.builder, rawConfig),
     build_script: parseBuildScript(rawConfig),
     //'boot_script': parse_boot_script(rawConfig),
-    //'launch_template': backends.launchTemplate.parse(rawConfig)
+    launch_template: launchTemplateConfig
   };
 
   const output = {
@@ -23,7 +33,8 @@ function parse(configPath, cliOpts) {
     packerTemplate: null,
     amiId: null,
     snapshotId: null,
-    templateId: null
+    templateId: null,
+    launchTemplateId: null
   };
 
   const status = {
@@ -42,17 +53,20 @@ function getRawConfig(configPath, cliOpts) {
 }
 
 function getBackends(rawConfig) {
-  const [authProvider] = Object.keys(rawConfig.auth);
+  const [authProvider] = Object.keys(rawConfig.auth || {});
   const [builderProvider] = Object.keys(rawConfig.builder);
+  const [ltProvider] = Object.keys(rawConfig.launch_template || {});
 
   if (process.env.verbose) {
     console.log(`Auth backend: ${authProvider}`);
     console.log(`Builder backend: ${builderProvider}`);
+    console.log(`LaunchTemplate backend: ${ltProvider}`);
   }
 
   return {
-    auth: backend.fetch(backend.auth, authProvider),
-    builder: backend.fetch(backend.builder, builderProvider),
+    auth: backend.fetchOptional(backend.auth, authProvider),
+    builder: backend.fetchRequired(backend.builder, builderProvider),
+    launchTemplate: backend.fetchOptional(backend.launchTemplate, ltProvider)
   };
 }
 

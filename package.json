@@ -9,6 +9,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
+    "aws-sdk": "^2.510.0",
     "commander": "^3.0.0",
     "micromustache": "^6.0.1"
   },

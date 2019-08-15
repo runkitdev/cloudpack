@@ -3,16 +3,16 @@
 const output = ([config, output, status]) => {
   if (config.cliOpts.dryRun) return output_dryrun(output, config);
   if (status.error) return output_error(output, status);
-  return output_success(config, output);
+  return output_success(output, config);
 };
 
 const output_success = (output, config) => {
   const relevantOutput = {
     ...(config.backends.builder.getRelevantOutput(output, config)),
-    //...(config.backends.launchTemplate.getRelevantOutput(output, config))
+    ...(config.backends.launchTemplate.getRelevantOutput(output, config))
   };
 
-  if (config.cliOpts.outputFormat == 'json') {
+  if (config.cliOpts.outputFormat === 'json') {
     console.log(JSON.stringify(relevantOutput, null, 2));
   }
 };

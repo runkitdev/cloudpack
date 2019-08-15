@@ -2,13 +2,26 @@
 
 const auth = require('./auth');
 const builder = require('./builder');
+const launchTemplate = require('./launch_template');
 
-function fetch(backendList, requested) {
-  if(backendList[requested] == undefined) {
-    throw new Error('Backend not found');
+function fetchRequired(backendList, requested) {
+  const backend = fetchOptional(backendList, requested);
+
+  if(backend === null) {
+    throw new Error(`Backend "${requested}" not found`);
   }
 
-  return backendList[requested];
+  return backend;
 }
 
-module.exports = { fetch, auth, builder };
+function fetchOptional(backendList, requested) {
+  return backendList[requested] || null;
+}
+
+module.exports = {
+  fetchRequired,
+  fetchOptional,
+  auth,
+  builder,
+  launchTemplate
+};
