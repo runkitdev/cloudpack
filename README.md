@@ -54,13 +54,13 @@ NOTE: By default, Node.js's AWS SDK does not check the shared configuration file
 
 ## builder
 
-The `builder` entry is required and contains the information that should be relayed to Packer during the Packer Build step. Similar to `auth`, it contains a key that represents the [builder](), and the corresponding values it needs to properly build the image.
+The `builder` entry is required and contains the information that should be relayed to Packer during the Packer Build step. Similar to `auth`, it contains a key that represents the [builder](https://www.packer.io/docs/builders/index.html), and the corresponding values it needs to properly build the image.
 
 Currently supported builders are: `amazon-chroot`.
 
 ### builder backend: amazon-chroot
 
-The `amazon-chroot` backend implements the [amazon-chroot builder](). The values in this entry, alongside other parts of the Cloudpack configuration file, will be used to generate a valid [Packer template](), which will then be built.
+The `amazon-chroot` backend implements the [amazon-chroot builder](https://www.packer.io/docs/builders/amazon-chroot.html). The values in this entry, alongside other parts of the Cloudpack configuration file, will be used to generate a valid [Packer template](https://www.packer.io/docs/templates/index.html#template-structure), which will then be built.
 
 There is no need to relay the `access_key` and `secret_key` entries; those values are inferred from the `auth` section.
 
@@ -89,7 +89,7 @@ NOTE: `amazon-chroot` builder requires root privileges.
 
 ## build_script
 
-The `build_script` section contains a list of commands that should be applied to the running Packer VM before it is turned into a static image. They use the same syntax of [Packer provisioners]().
+The `build_script` section contains a list of commands that should be applied to the running Packer VM before it is turned into a static image. They use the same syntax of [Packer provisioners](https://www.packer.io/docs/provisioners/index.html).
 
 The build script execution is ordered; that is, it follows the same order declared in the configuration file.
 
@@ -117,7 +117,7 @@ The `build_script` entry is optional and may be omitted.
 
 The `boot_script` section contains a list of commands that should be executed during the boot process. 
 
-The configuration must include a `type` entry, which states *how* the boot script will be executed. It may be executed either as `rc.local`, which creates an executable `/etc/rc.local` entry, or as `user-data`, which relies on [AWS UserData]().
+The configuration must include a `type` entry, which states *how* the boot script will be executed. It may be executed either as `rc.local`, which creates an executable `/etc/rc.local` entry, or as `user-data`, which relies on [AWS UserData](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html).
 
 Currently only `rc.local` execution method is implemented.
 
