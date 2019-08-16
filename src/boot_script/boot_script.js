@@ -34,14 +34,14 @@ function generateBootShellScript({ boot_script: bsConfig }) {
 }
 
 function _shGetShebang({ she_bang }) {
-  if (she_bang === undefined) return defaultShebang;
+  if (she_bang === undefined || she_bang === '') return defaultShebang;
   if (she_bang.indexOf('#!') === -1 && !process.env.hideWarnings)
     console.log(`[WARNING] Shebang seems wrong: ${she_bang}`);
   return she_bang;
 }
 
 function _shGetFlags({ flags }) {
-  if (flags === undefined) return '';
+  if (flags === undefined || flags === '') return '';
   if (flags.indexOf('set -') === -1) return `set -${flags}`;
   return flags;
 }

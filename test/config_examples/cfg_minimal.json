@@ -1,0 +1,8 @@
+{
+  "builder": {
+    "amazon-chroot": {
+      "ami_name": "MyAmazingApp",
+      "source_ami": "ami-12345678"
+    }
+  }
+}

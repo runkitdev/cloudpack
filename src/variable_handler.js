@@ -4,13 +4,13 @@ const { render } = require('micromustache');
 
 function updateRuntimeVariables(config, output) {
   const scope = { runtime: output };
-  const opts = { prefix: 'runtime', skipOnMissing: true };
+  const opts = { prefix: 'runtime', onMissing: 'skip' };
   return replaceEntry(config, { scope, opts });
 }
 
 function updateUserVariables(config, vars) {
   const scope = { var: vars };
-  const opts = { prefix: 'var', failOnMissing: true };
+  const opts = { prefix: 'var', onMissing: 'fail' };
   return replaceEntry(config, { scope, opts });
 }
 
@@ -45,8 +45,8 @@ function replaceVariable(string, { scope, opts }) {
 
   const newString = render(string, scope);
   if (newString === '') {
-    if (opts.failOnMissing) throw new Error(`Missing variable ${string}`);
-    if (opts.skipOnMissing) return string;
+    if (opts.onMissing === 'fail') throw new Error(`Missing var: ${string}`);
+    if (opts.onMissing === 'skip') return string;
   }
 
   return newString;

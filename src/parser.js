@@ -3,27 +3,25 @@
 const fs = require('fs');
 const backend = require('./backend');
 const bootScript = require('./boot_script');
-const variableHandler = require('./variable_handler.js');
+const variableHandler = require('./variable_handler');
 
 function parse(configPath, cliOpts) {
   const rawConfig = getRawConfig(configPath, cliOpts);
   const backends = getBackends(rawConfig);
 
   let authConfig = null;
-  if (backends.auth !== null) {
-    authConfig = backends.auth.parseRawConfig(rawConfig.auth, rawConfig);
-  }
+  if (backends.auth !== null)
+    authConfig = backends.auth.parseRawConfig(rawConfig);
 
   let launchTemplateConfig = null;
-  if (backends.launchTemplate !== null) {
+  if (backends.launchTemplate !== null)
     launchTemplateConfig = backends.launchTemplate.parseRawConfig(rawConfig);
-  }
 
   const config = {
     cliOpts,
     backends,
     auth: authConfig,
-    builder: backends.builder.parseRawConfig(rawConfig.builder, rawConfig),
+    builder: backends.builder.parseRawConfig(rawConfig),
     build_script: parseBuildScript(rawConfig),
     boot_script: bootScript.parseRawConfig(rawConfig),
     launch_template: launchTemplateConfig
@@ -34,7 +32,6 @@ function parse(configPath, cliOpts) {
     packerTemplate: null,
     amiId: null,
     snapshotId: null,
-    templateId: null,
     launchTemplateId: null
   };
 
@@ -72,6 +69,7 @@ function getBackends(rawConfig) {
 }
 
 function parseBuildScript(rawConfig) {
+  if (rawConfig.build_script === undefined) return [];
   return rawConfig.build_script;
 }
 
@@ -94,12 +92,7 @@ function performConfigSanityCheck(rawConfig) {
 }
 
 function formatConfig(rawConfig, { vars }) {
-  let newConfig = variableHandler.updateUserVariables(rawConfig, vars);
-
-  if (rawConfig.build_script === undefined)
-    newConfig.build_script = [];
-
-  return newConfig;
+  return variableHandler.updateUserVariables(rawConfig, vars);
 }
 
 module.exports = { parse };

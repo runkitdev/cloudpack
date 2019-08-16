@@ -1,7 +1,13 @@
 'use strict';
 
-function parseRawConfig({ 'amazon-chroot': builderRawConfig }) {
-  return builderRawConfig;
+function parseRawConfig({ builder: builderRawConfig }) {
+  const amazonChrootConfig = builderRawConfig['amazon-chroot'];
+
+  const acKeys = Object.keys(amazonChrootConfig);
+  if (! acKeys.includes('ami_name'))
+    throw new Error('I really need `ami_name` on the builder configuration.');
+
+  return amazonChrootConfig;
 }
 
 function configureBuilder(config) {
@@ -71,6 +77,7 @@ function getBuilderCredentials(config) {
 }
 
 module.exports = { 
+  name: 'amazon-chroot',
   parseRawConfig,
   configureBuilder,
   parseBuildResult,

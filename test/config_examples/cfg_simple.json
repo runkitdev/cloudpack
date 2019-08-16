@@ -1,0 +1,51 @@
+{
+  "auth": {
+    "aws": {
+      "access_key": "myAccessKey",
+      "secret_key": "mySecretKey",
+      "region": "myRegion"
+    }
+  },
+  "builder": {
+    "amazon-chroot": {
+      "ami_name": "MyAmazingApp-{{ var.version }}",
+      "source_ami": "ami-12345678",
+      "nvme_device_path": "/dev/nvme1n1p",
+      "device_path": "/dev/sdf",
+      "ena_support": true
+    }
+  },
+  "build_script": [
+    {
+      "type": "file",
+      "source": "/tmp/packer.json",
+      "destination": "/tmp/my_custom_script.sh"
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+        "FOO=bar"
+      ],
+      "inline": [
+        "echo \"$FOO\" > /tmp/foo",
+        "chmod +x /tmp/my_custom_script.sh"
+      ]
+    }
+  ],
+  "boot_script": {
+    "type": "rc.local",
+    "flags": "eu",
+    "cmds": [
+      "echo 'Hello world' > /tmp/hello"
+    ]
+  },
+  "launch_template": {
+    "aws": {
+      "source_template": "lt-12345678",
+      "source_version": "1",
+      "modifications": {
+        "ImageId": "{{ runtime.amiId }}"
+      }
+    }
+  }
+}

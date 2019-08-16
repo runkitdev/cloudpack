@@ -27,7 +27,7 @@ function main() {
         await cloudpack.executePipeline(configPath, opts);
       } catch(e) {
         console.log('Fatal error: ' + e.message);
-        console.log(e);
+        if (process.env.verbose) console.log(e);
       }
     });
 

@@ -2,7 +2,11 @@
 
 const EC2 = require('aws-sdk/clients/ec2');
 
-function parseRawConfig({ aws: authConfig }) {
+function parseRawConfig(rawConfig) {
+  if (rawConfig.auth === undefined || rawConfig.auth.aws === undefined)
+    return null;
+
+  const authConfig = rawConfig.auth.aws;
   let auth = authConfig;
 
   if (authConfig.access_key === undefined || authConfig.access_key === '')
@@ -43,4 +47,4 @@ function getClientConfig(auth) {
   return config;
 }
 
-module.exports = { parseRawConfig, getClientEC2 };
+module.exports = { name: 'aws', parseRawConfig, getClientEC2 };

@@ -35,7 +35,7 @@ function parseRawConfig(rawConfig) {
     `);
   }
 
-  if (ltConfig.template_data === {})
+  if (Object.keys(ltConfig.template_data).length === 0)
     throw new Error('Your `template_data` LaunchTemplate entry must not be empty.');
 
   return {
@@ -53,7 +53,8 @@ async function create(config) {
     const result = await _awsCreateLaunchTemplate(ec2, params);
     const launchTemplateId = result.LaunchTemplate.LaunchTemplateId;
 
-    if (process.env.verbose) console.log(`LaunchTemplate created: \n${result}`);
+    if (process.env.verbose)
+      console.dir(`LaunchTemplate created: \n${result}`, { depth: null });
 
     return { success: true, resources: { launchTemplateId } };
   } catch(e) {
@@ -68,7 +69,6 @@ async function create(config) {
 
     return { success: false, errorMsg: errorMsg };
   }
-
 }
 
 async function update(config) {
@@ -79,7 +79,8 @@ async function update(config) {
     const result = await _awsCreateLaunchTemplateVersion(ec2, params);
     const launchTemplateId = result.LaunchTemplateVersion.LaunchTemplateId;
 
-    if (process.env.verbose) console.log(`LaunchTemplate updated: \n${result}`);
+    if (process.env.verbose)
+      console.dir(`LaunchTemplate updated: \n${result}`, { depth: null });
 
     return { success: true, resources: { launchTemplateId } };
   } catch(e) {
@@ -94,7 +95,6 @@ async function update(config) {
 
     return { success: false, errorMsg: errorMsg };
   }
-
 }
 
 function getRelevantOutput(output, config) {
@@ -135,4 +135,10 @@ async function _awsCreateLaunchTemplateVersion(ec2, params) {
   return await ec2.createLaunchTemplateVersion(params).promise();
 }
 
-module.exports = { parseRawConfig, create, update, getRelevantOutput };
+module.exports = {
+  name: 'aws',
+  parseRawConfig,
+  create,
+  update,
+  getRelevantOutput
+};

@@ -8,15 +8,9 @@ const defaultRcLocalPath = '/etc/rc.local';
 
 function generateProvisioners(bootScript, config) {
   const filePath = getBootFilePath(config.cliOpts.tmpPath);
-
-  try {
-    writeBootFile(filePath, bootScript);
-  } catch(e) {
-    cleanUpBootFile(config);
-    throw e;
-  }
-
   const destPath = config.boot_script.rc_local_path || defaultRcLocalPath;
+
+  writeBootFile(filePath, bootScript);
 
   return [
     { type: 'file', source: filePath, destination: destPath },
@@ -45,4 +39,4 @@ function getBootFilePath(tmpPath) {
   return tmpPath + '/cloudpack_tmp_boot_file.sh';
 }
 
-module.exports = { generateProvisioners };
+module.exports = { generateProvisioners, cleanUpBootFile };

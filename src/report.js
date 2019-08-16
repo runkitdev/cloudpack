@@ -9,10 +9,7 @@ const output = ({ config, output, status }) => {
 const output_success = (output, config) => {
   if (process.env.verbose) output_dryrun(output, config);
 
-  const relevantOutput = {
-    ...(config.backends.builder.getRelevantOutput(output, config)),
-    ...(config.backends.launchTemplate.getRelevantOutput(output, config))
-  };
+  const relevantOutput = assembleRelevantOutput(output, config);
 
   if (config.cliOpts.outputFormat === 'json') {
     console.log(JSON.stringify(relevantOutput, null, 2));
@@ -20,7 +17,7 @@ const output_success = (output, config) => {
 };
 
 const output_error = (output, status) => {
-  console.log('\n\n\nCloudpack error: ' + status.errorMsg);
+  console.log('Cloudpack error: ' + status.errorMsg);
 };
 
 const output_dryrun = (output, config) => {
@@ -36,6 +33,13 @@ const output_dryrun = (output, config) => {
     console.log('\n\n[Debug] Internal pipeline config:');
     console.log(JSON.stringify(config, null, 2));
   }
+};
+
+const assembleRelevantOutput = (output, config) => {
+  return {
+    ...(config.backends.builder.getRelevantOutput(output, config)),
+    ...(config.backends.launchTemplate.getRelevantOutput(output, config))
+  };
 };
 
 module.exports = { output };

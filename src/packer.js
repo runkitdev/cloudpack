@@ -110,9 +110,8 @@ async function cleanUpPackerTemplate(templatePath) {
   try {
     await unlink(templatePath);
 
-    if (process.env.verbose) {
+    if (process.env.verbose)
       console.log(`Packer template deleted from ${templatePath}`);
-    }
   } catch(e) {
     console.log('Error while cleaning up generated packer template...');
   }
