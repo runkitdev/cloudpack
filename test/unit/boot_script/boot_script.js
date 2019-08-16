@@ -38,7 +38,7 @@ secondLine
 `;
 
       const conf2 = {
-        she_bang: '#!/bin/sh',
+        shebang: '#!/bin/sh',
         flags: 'eu',
         cmds: [ 'echo \'wat\' > /dev/null', 'FOO=$(bar)' ]
       };

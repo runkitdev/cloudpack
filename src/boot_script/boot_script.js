@@ -33,11 +33,11 @@ function generateBootShellScript({ boot_script: bsConfig }) {
   return `${shebang}\n${flags}\n\n${body}`;
 }
 
-function _shGetShebang({ she_bang }) {
-  if (she_bang === undefined || she_bang === '') return defaultShebang;
-  if (she_bang.indexOf('#!') === -1 && !process.env.hideWarnings)
-    console.log(`[WARNING] Shebang seems wrong: ${she_bang}`);
-  return she_bang;
+function _shGetShebang({ shebang }) {
+  if (shebang === undefined || shebang === '') return defaultShebang;
+  if (shebang.indexOf('#!') === -1 && !process.env.hideWarnings)
+    console.log(`[WARNING] Shebang seems wrong: ${shebang}`);
+  return shebang;
 }
 
 function _shGetFlags({ flags }) {
