@@ -35,8 +35,7 @@ async function build({ config, output, status }) {
     await execPackerValidate(templatePath);
     if (process.env.verbose) console.log('Packer template validated.');
   } catch(e) {
-    cleanUpPackerTemplate(templatePath);
-    const errorMsg = `Generated Packer template is invalid.\n\n${e.stdout}`;
+    const errorMsg = `Generated Packer template is invalid. Reason:\n\n${e.stdout}\n\nYou can inspect the template at ${templatePath}`;
     return { config, output, status: { error: true, errorMsg } };
   }
 
